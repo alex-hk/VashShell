@@ -4,13 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <syscall.h>
+#include "mycommands.h"
 
-struct scall {
-	char * func;
-	char * argv[];
-};
 
-int parser(char * input);
+int parser(struct scall * scal);
 void decision(struct scall * scal);
 int getInput();
 int parsefunc(struct scall * scal);
@@ -18,17 +15,19 @@ int parseargs(struct scall * scal);
 
 
 int main(int argc, char* argv[]){
-	char* str;
+	char * str;
 	int size = 1024;
-	int choice;
+	struct scall scal;
 	while (1){
 		if(getInput(str, size-1) == 0){
 			printf("Error getting input\n");
 			exit(1);
 		}
-		printf("Message: %s\n", str);
-		choice = parser(str);
-		decision(choice, str);
+		str[strcspn(str, "\n")] = 0;
+		scal.fmsg = str;
+		printf("Message: %s\n", scal.fmsg);
+		parser(&scal);
+		decision(&scal);
 	}
 	return 0;
 }
@@ -42,34 +41,34 @@ int getInput(char* str, int size){
 	if(getcwd(cdir, 1024) == NULL)
 		perror("getcwd() error\n");
 	printf("%s:%s# ", username, cdir);
-	gets(input);
+	fgets(input, size, stdin);
 	if(strncpy(str, input, size) == NULL)
 		return 0;
 	else return 1;
-
 }
 
-scall* parser(char * input){
-	int choice = 0;
-	struct scall scal;
-	parsefunc(&scal);
-	parseargs(&scal);
-	if(input != NULL){
-		if(strncmp(input, "cat ", 4) == 0 || strncmp(input, "cat\0", 4) == 0)
+int parser(struct scall * scal){
+	parsefunc(scal);
+	parseargs(scal);
+	if(scal->fmsg != NULL){
+		if(strncmp(scal->fmsg, "cat ", 4) == 0 || strncmp(scal->fmsg, "cat\0", 4) == 0)
 			scal->func = "cat";
-		if(strncmp(input, "cd ", 3) == 0 || strncmp(input, "cd\0", 3) == 0)
+		else if(strncmp(scal->fmsg, "cd ", 3) == 0 || strncmp(scal->fmsg, "cd\0", 3) == 0)
 			scal->func = "cd";
-		if(strncmp(input, "ls ", 3) == 0 || strncmp(input, "ls\0", 3) == 0)
+		else if(strncmp(scal->fmsg, "ls ", 3) == 0 || strncmp(scal->fmsg, "ls\0", 3) == 0)
 			scal->func = "ls";
-		if(strncmp(input, "grep ", 5) == 0 || strncmp(input, "grep\0", 5) == 0)
+		else if(strncmp(scal->fmsg, "grep ", 5) == 0 || strncmp(scal->fmsg, "grep\0", 5) == 0)
 			scal->func = "grep";
-	}
-	return scal;
+		return 1;
+	} else return 1;
+
+	return 0;
 }
 
-int parsefunc(struct scall * scal, char * str){
+int parsefunc(struct scall * scal){
 	char func[8];
 	int i = 0;
+	char * str = scal->fmsg;
 	if(str != NULL){
 		while(str[i] != '\0' && str[i] != ' '){
 			func[i] = str[i];
@@ -78,36 +77,46 @@ int parsefunc(struct scall * scal, char * str){
 	}
 	func[i] = '\0';
 	printf("Function for string \" %s \" is %s\n", str, func);
-	strcpy(scal->func, func);
+	scal->func = func;
+	scal->msgargs = str+i+1;
+	printf("Message arguments: %s\n", scal->msgargs);
 	return 0;
 }
 
-int parseargs(struct scall * scal, char * str){
+int parseargs(struct scall * scal){
 	int i = 0;
+	scal->args = malloc(5 * sizeof *scal->args);
+	char * str = strdup(scal->msgargs);
 	if(str != NULL){
-		while(str[i] != '\0'){
-		
+		char * token;
+		while((token = strsep(&str, " "))){
+		//	printf("Token: %s\n", token);
+			*(scal->args+i) = token;
+		//	printf("%s\n", *(scal->args+i));
+			i++;
 		}
+	} else {
+		return 1;
 	}
+	return 0;
 }
 
 void decision(struct scall * scal){
-	int rc;
-	char args[1024];
-	switch(choice){
-		case 1: printf("cat chosen\n");		//cat
-			strcpy(args, str+4);
-			if(
-		case 2: printf("cd chosen\n"); 		//cd
-			strcpy(args, str+3);
-			printf("Args for cd: %s\n", args);
-			if(strcmp(args, "~") == 0)
-				strcpy(args,getenv("HOME"));
-			if(chdir(args) == -1)
-				fprintf(stderr, "chdir failed, errno = %d\n", errno);
-			break;//cd
-		case 3: printf("ls chosen\n");   break; //ls
-		case 4: printf("grep chosen\n"); break; //grep
-		case 0: printf("Invalid choice\n"); break; //invalid choice
+	if(strcmp(scal->func,"cat") == 0){		//CAT
+		//printf("cat chosen\n");
+		_cat(scal);
+	}
+	else if(strcmp(scal->func, "cd") == 0){		//CD
+		_cd(scal);
+	}
+	else if(strcmp(scal->func,"ls") == 0){		//LS
+		//printf("ls chosen\n");
+		_ls(scal);
+	}
+	else if(strcmp(scal->func, "grep") == 0){	//GREP
+		printf("grep chosen\n");
+	}
+	else{
+		printf("Invalid choice\n");		//DEFAULT
 	}
 }
