@@ -12,14 +12,18 @@
  */
 
 struct scall {
-	char * fmsg;
-	char * msgargs;
-	char * func;
-	char ** args;
+	char *	fmsg;
+	char *	msgargs;
+	char *	func;
+	char **	args;
+	int 	argc;
 };
 
 //Function header for cd
 int _cd(struct scall * sc);
+
+//Function header for cp
+int _cp(struct scall * sc);
 
 //Function header for ls
 int _ls(struct scall * sc);

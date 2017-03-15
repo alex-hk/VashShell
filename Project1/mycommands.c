@@ -34,6 +34,10 @@ int _cd(struct scall * sc){
 	return 0;
 }
 
+int _cp(struct scall * sc){
+	return 0;
+}
+
 int _ls(struct scall * sc){
 	DIR *dir;
 	struct dirent *de;
@@ -53,5 +57,6 @@ int _ls(struct scall * sc){
 
 int _grep(struct scall * sc){
 	char buf[1024]; //Buffer for found values
+	FILE * f;
 	return 0;
 }

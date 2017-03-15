@@ -55,6 +55,8 @@ int parser(struct scall * scal){
 			scal->func = "cat";
 		else if(strncmp(scal->fmsg, "cd ", 3) == 0 || strncmp(scal->fmsg, "cd\0", 3) == 0)
 			scal->func = "cd";
+		else if(strncmp(scal->fmsg, "cp ", 3) == 0 || strncmp(scal->fmsg, "cp\0", 3) == 0)
+			scal->func = "cp";	
 		else if(strncmp(scal->fmsg, "ls ", 3) == 0 || strncmp(scal->fmsg, "ls\0", 3) == 0)
 			scal->func = "ls";
 		else if(strncmp(scal->fmsg, "grep ", 5) == 0 || strncmp(scal->fmsg, "grep\0", 5) == 0)
@@ -94,6 +96,7 @@ int parseargs(struct scall * scal){
 			*(scal->args+i) = token;
 		//	printf("%s\n", *(scal->args+i));
 			i++;
+			scal->argc = i;
 		}
 	} else {
 		return 1;
@@ -109,6 +112,9 @@ void decision(struct scall * scal){
 	else if(strcmp(scal->func, "cd") == 0){		//CD
 		_cd(scal);
 	}
+	else if(strcmp(scal->func, "cd") == 0){		//CD
+		_cp(scal);
+	}	
 	else if(strcmp(scal->func,"ls") == 0){		//LS
 		//printf("ls chosen\n");
 		_ls(scal);
