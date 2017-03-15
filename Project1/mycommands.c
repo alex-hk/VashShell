@@ -22,8 +22,8 @@ int _cat(struct scall * sc){
 
 int _cd(struct scall * sc){
 	if(strcmp(sc->args[0], "~") == 0){
-		printf("Home directory: %s\n", getenv("PATH"));
-		chdir(getenv("PATH"));
+		printf("Home directory: %s\n", getenv("HOME"));
+		chdir(getenv("HOME"));
 		return 0;
 	}
 	printf("Home Directory: %s\n", sc->args[0]);
