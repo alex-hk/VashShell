@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
 		}
 		str[strcspn(str, "\n")] = 0;
 		scal.fmsg = str;
-		printf("Message: %s\n", scal.fmsg);
+	//	printf("Message: %s\n", scal.fmsg);
 		parser(&scal);
 		decision(&scal);
 	}
@@ -51,11 +51,14 @@ int parser(struct scall * scal){
 	parsefunc(scal);
 	parseargs(scal);
 	if(scal->fmsg != NULL){
-		if(strncmp(scal->fmsg, "cat ", 4) == 0 || strncmp(scal->fmsg, "cat\0", 4) == 0)
+		if(strncmp(scal->fmsg, "cat ", 4) == 0 ||
+				strncmp(scal->fmsg, "cat\0", 4) == 0)
 			scal->func = "cat";
-		else if(strncmp(scal->fmsg, "cd ", 3) == 0 || strncmp(scal->fmsg, "cd\0", 3) == 0)
+		else if(strncmp(scal->fmsg, "cd ", 3) == 0 ||
+				strncmp(scal->fmsg, "cd\0", 3) == 0)
 			scal->func = "cd";
-		else if(strncmp(scal->fmsg, "cp ", 3) == 0 || strncmp(scal->fmsg, "cp\0", 3) == 0)
+		else if(strncmp(scal->fmsg, "cp ", 3) == 0 ||
+				strncmp(scal->fmsg, "cp\0", 3) == 0)
 			scal->func = "cp";	
 		else if(strncmp(scal->fmsg, "ls ", 3) == 0 || strncmp(scal->fmsg, "ls\0", 3) == 0)
 			scal->func = "ls";
@@ -78,10 +81,10 @@ int parsefunc(struct scall * scal){
 		}
 	}
 	func[i] = '\0';
-	printf("Function for string \" %s \" is %s\n", str, func);
+	//printf("Function for string \" %s \" is %s\n", str, func);
 	scal->func = func;
 	scal->msgargs = str+i+1;
-	printf("Message arguments: %s\n", scal->msgargs);
+	//printf("Message arguments: %s\n", scal->msgargs);
 	return 0;
 }
 
@@ -90,11 +93,21 @@ int parseargs(struct scall * scal){
 	scal->args = malloc(5 * sizeof *scal->args);
 	char * str = strdup(scal->msgargs);
 	if(str != NULL){
+		char * ptr;
+		int j = 1;
 		char * token;
+		if(str[0] == '"'){
+			while(str[j] != '"' && str[j] != '\n' && str[j] != '\0'){
+				j++;
+			}
+			strncpy(*(scal->args+i), str+1, j-1);
+			//printf("String with quotes: %s\n", *(scal->args+i));
+			i++;
+		}
 		while((token = strsep(&str, " "))){
-		//	printf("Token: %s\n", token);
+			//printf("Token: %s\n", token);
 			*(scal->args+i) = token;
-		//	printf("%s\n", *(scal->args+i));
+			//printf("%s\n", *(scal->args+i));
 			i++;
 			scal->argc = i;
 		}
@@ -112,7 +125,7 @@ void decision(struct scall * scal){
 	else if(strcmp(scal->func, "cd") == 0){		//CD
 		_cd(scal);
 	}
-	else if(strcmp(scal->func, "cd") == 0){		//CD
+	else if(strcmp(scal->func, "cp") == 0){		//CD
 		_cp(scal);
 	}	
 	else if(strcmp(scal->func,"ls") == 0){		//LS
@@ -121,6 +134,7 @@ void decision(struct scall * scal){
 	}
 	else if(strcmp(scal->func, "grep") == 0){	//GREP
 		printf("grep chosen\n");
+		_grep(scal);
 	}
 	else{
 		printf("Invalid choice\n");		//DEFAULT

@@ -16,7 +16,7 @@ int _cat(struct scall * sc){
 
 	while(fgets(lbuf, sizeof lbuf, f) != NULL)
 		printf("%s",lbuf);
-	
+	fclose(f);	
 	return 0;
 }
 
@@ -35,6 +35,61 @@ int _cd(struct scall * sc){
 }
 
 int _cp(struct scall * sc){
+	//Instructions
+	//cp file.txt file2.txt
+	//Open file.txt
+	//Open dest
+	//Make file in dest
+	//copy file.txt into src with same name
+	//
+
+
+
+	FILE ** f;
+	char buf[1024];
+	f = malloc(sizeof(FILE) * (sc->argc));
+	DIR * dirsrc;
+	DIR * dirdest;
+	struct dirent *de;
+	int i = 0;
+	//if(strcmp(sc->args[0], "-r") == 0 ||
+	//		strcmp(sc->args[0], "-R") == 0 ||
+	//	        strcmp(sc->args[0], "--recursive")){
+	//	if((dirsrc = opendir(sc->args[1])) != NULL){
+	//		if((dirdest = opendir(sc->args[sc->argc-1])) == NULL){
+	//			printf("Directory %s does not exist\n", sc->args[sc->argc])
+	//		}
+	//		while( i <= sc->argc - 1){
+	//			if((f[i] = fopen(sc->args[i], "r")) == NULL){
+	//				printf("No such file or directory\n");
+	//			} else {
+	//				
+	//			}
+	//		}
+	//	} else {
+	//		fprintf(stderr, "Directory does not exist: %s\n", 
+	//				strerror(errno));
+	//	}
+	//
+	//}
+		
+	if((f[0] = fopen(sc->args[0], "r")) != NULL){
+		if((f[1] = fopen(sc->args[1], "w+")) != NULL){
+			while(fgets(buf, 1023, f[0]) != NULL){
+				fgets(buf, sizeof buf, f[0]);
+				fputs(buf, f[1]);
+			}
+		}else{
+			printf("Something went completely wrong\n");
+			return 1;
+		}
+	} else {
+		fprintf(stderr, "%s\n", strerror(errno));
+		return 1;
+	}
+	fclose(f[0]);
+	fclose(f[1]);
+
 	return 0;
 }
 
@@ -43,7 +98,9 @@ int _ls(struct scall * sc){
 	struct dirent *de;
 	if((dir = opendir(".")) != NULL){
 		while((de = readdir(dir)) !=  NULL){
-			if(strcmp(sc->args[0],"-a") == 0 || (strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0))
+			if(strcmp(sc->args[0],"-a") == 0 ||
+					(strcmp(de->d_name, ".") != 0 &&
+					 strcmp(de->d_name, "..") != 0))
 				printf("%s ", de->d_name);
 		}
 		printf("\n");
@@ -57,6 +114,20 @@ int _ls(struct scall * sc){
 
 int _grep(struct scall * sc){
 	char buf[1024]; //Buffer for found values
-	FILE * f;
+	FILE ** f;
+	int count = 0;
+	char * lookup = malloc(sizeof(sc->args[0]));
+	strncpy(lookup, sc->args[0]+1, sizeof(strlen(sc->args[0]-1)));
+	printf("String: %s\n", lookup);
+	f = malloc(sizeof(FILE) * (sc->argc-1));
+	while(count < (sc->argc - 1)){
+		if((f[0] = fopen(sc->args[1], "r")) != NULL){
+			
+		} else {
+			fprintf(stderr, "%s\n", strerror(errno));
+			return 1;
+		}
+	}
+	fclose(f[0]);
 	return 0;
 }
