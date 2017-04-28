@@ -139,3 +139,43 @@ int _grep(struct scall * sc){
 	fclose(f[0]);
 	return 0;
 }
+
+int _clear(struct scall * sc){
+	return 0;
+}
+
+int _mkdir(struct scall * sc){
+	return 0;
+}
+
+int _rmdir(struct scall * sc){
+	return 0;
+}
+
+int _timeout(struct scall * sc){
+	return 0;
+}
+
+int _wait(struct scall * sc){
+	return 0;
+}
+
+int _sleep(struct scall * sc){
+	return 0;
+}
+
+int _kill(struct scall * sc){
+	return 0;
+}
+
+int _stat(struct scall * sc){
+	return 0;
+}
+
+int _diff(struct scall * sc){
+	return 0;
+}
+
+int _env(struct scall * sc){
+	return 0;
+}

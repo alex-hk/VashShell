@@ -17,6 +17,8 @@ struct scall {
 	char *	func;
 	char **	args;
 	int 	argc;
+	char ** opts;
+	int	optc;
 };
 
 //Function header for cd

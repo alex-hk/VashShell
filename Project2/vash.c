@@ -131,9 +131,9 @@ int parseargs(struct scall * scal){
 			}
 
 			//while((token = strsep(&str, " "))){
-			//	//printf("Token: %s\n", token);
+			//	printf("Token: %s\n", token);
 			//	*(scal->args+i) = token;
-			//	//printf("%s\n", *(scal->args+i));
+			//	printf("%s\n", *(scal->args+i));
 			//	i++;
 			//	scal->argc = i;
 			//}
@@ -151,18 +151,46 @@ void decision(struct scall * scal){
 		//printf("cat chosen\n");
 		_cat(scal);
 	}
-	else if(strcmp(scal->func, "cd") == 0){		//CD
+	else if(strcmp(scal->func, "clear") == 0 || strcmp(scal->func, "clr") == 0){		//CLEAR
 		_cd(scal);
 	}
-	else if(strcmp(scal->func, "cp") == 0){		//CD
+	else if(strcmp(scal->func, "mkdir") == 0){		//MKDIR
+		_mkdir(scal);
+	}
+	else if(strcmp(scal->func, "rmdir") == 0){		//RMDIR
+		_rmdir(scal);
+	}
+	else if(strcmp(scal->func, "sleep") == 0){		//SLEEP
+		_sleep(scal);
+	}
+	else if(strcmp(scal->func, "kill") == 0){		//KILL
+		_kill(scal);
+	}
+	else if(strcmp(scal->func, "diff") == 0){		//DIFF
+		_diff(scal);
+	}
+
+	else if(strcmp(scal->func, "cp") == 0){			//CP
 		_cp(scal);
-	}	
-	else if(strcmp(scal->func,"ls") == 0){		//LS
+	}
+	else if(strcmp(scal->func, "env") == 0){		//ENV
+		_env(scal);
+	}
+	else if(strcmp(scal->func, "timeout") == 0){		//TIMEOUT
+		_timeout(scal);
+	}
+	else if(strcmp(scal->func, "wait") == 0){		//WAIT
+		_wait(scal);
+	}
+	else if(strcmp(scal->func, "cd") == 0){			//CD
+		_cd(scal);
+	}
+	else if(strcmp(scal->func,"ls") == 0){			//LS
 		//printf("ls chosen\n");
 		_ls(scal);
 	}
-	else if(strcmp(scal->func, "grep") == 0){	//GREP
-		printf("grep chosen\n");
+	else if(strcmp(scal->func, "grep") == 0){		//GREP
+		//printf("grep chosen\n");
 		_grep(scal);
 	}
 	else{
