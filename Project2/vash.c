@@ -62,10 +62,39 @@ int parser(struct scall * scal){
 		else if(strncmp(scal->fmsg, "cp ", 3) == 0 ||
 				strncmp(scal->fmsg, "cp\0", 3) == 0)
 			scal->func = "cp";	
-		else if(strncmp(scal->fmsg, "ls ", 3) == 0 || strncmp(scal->fmsg, "ls\0", 3) == 0)
+		else if(strncmp(scal->fmsg, "ls ", 3) == 0 ||
+				strncmp(scal->fmsg, "ls\0", 3) == 0)
 			scal->func = "ls";
-		else if(strncmp(scal->fmsg, "grep ", 5) == 0 || strncmp(scal->fmsg, "grep\0", 5) == 0)
+		else if(strncmp(scal->fmsg, "grep ", 5) == 0 ||
+				strncmp(scal->fmsg, "grep\0", 5) == 0)
 			scal->func = "grep";
+		else if(strncmp(scal->fmsg, "wait ", 5) == 0 ||
+				strncmp(scal->fmsg, "wait\0", 5) == 0)
+			scal->func = "wait";
+		else if(strncmp(scal->fmsg, "timeout ", 8) == 0 ||
+				strncmp(scal->fmsg, "timeout\0", 8) == 0)
+			scal->func = "timeout";
+		else if(strncmp(scal->fmsg, "kill ", 5) == 0 ||
+				strncmp(scal->fmsg, "kill\0", 5) == 0)
+			scal->func = "kill";
+		else if(strncmp(scal->fmsg, "mkdir ", 6) == 0 ||
+				strncmp(scal->fmsg, "mkdir\0", 6) == 0)
+			scal->func = "mkdir";
+		else if(strncmp(scal->fmsg, "rmdir ", 6) == 0 ||
+				strncmp(scal->fmsg, "rmdir\0", 6) == 0)
+			scal->func = "rmdir";
+		else if(strncmp(scal->fmsg, "stat ", 5) == 0 ||
+				strncmp(scal->fmsg, "stat\0", 5) == 0)
+			scal->func = "stat";
+		else if(strncmp(scal->fmsg, "sleep ", 6) == 0 ||
+				strncmp(scal->fmsg, "sleep\0", 6) == 0)
+			scal->func = "sleep";
+		else if(strncmp(scal->fmsg, "diff ", 5) == 0 ||
+				strncmp(scal->fmsg, "diff\0", 5) == 0)
+			scal->func = "diff";
+		else if(strncmp(scal->fmsg, "env ", 4) == 0 ||
+				strncmp(scal->fmsg, "env\0", 4) == 0)
+			scal->func = "env";
 		return 1;
 	} else return 1;
 
@@ -110,11 +139,11 @@ int parseargs(struct scall * scal){
 			if(*ptr == '\0')
 				isArgs = 0;
 			else if(*ptr == ' '){
-				printf("Skipping white space\n");
+				//printf("Skipping white space\n");
 				while(*ptr == ' ') ptr++;
 			}
 			else if(*ptr == '\"' || *ptr == '\''){
-				printf("Quote string start\n");
+				//printf("Quote string start\n");
 				ptr++;
 				j = 0;
 				while(*ptr != '\0' && *ptr != '\n' && (*ptr != '"' && *ptr != '\'')){
@@ -123,7 +152,7 @@ int parseargs(struct scall * scal){
 				}
 				strncpy(*(scal->args+i), ptr-j, j);
 				(*(scal->args+i))[j] = '\0';
-				printf("String with quotes: %s\n", *(scal->args+i));
+				//printf("String with quotes: %s\n", *(scal->args+i));
 				i++;
 				ptr++;
 			}
@@ -186,7 +215,7 @@ void decision(struct scall * scal){
 		_cat(scal);
 	}
 	else if(strcmp(scal->func, "clear") == 0 || strcmp(scal->func, "clr") == 0){		//CLEAR
-		_cd(scal);
+		_clear(scal);
 	}
 	else if(strcmp(scal->func, "mkdir") == 0){		//MKDIR
 		_mkdir(scal);

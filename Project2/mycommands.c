@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include "mycommands.h"
 #include <dirent.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 int _cat(struct scall * sc){
 	char lbuf[1024]; //Buffer for line
@@ -26,7 +30,7 @@ int _cd(struct scall * sc){
 		chdir(getenv("HOME"));
 		return 0;
 	}
-	printf("Home Directory: %s\n", sc->args[0]);
+	//printf("Home Directory: %s\n", sc->args[0]);
 	if(chdir(sc->args[0]) < 0){
 		fprintf(stderr, "No such directory: %s\n", strerror(errno));
 		return 1;
@@ -145,15 +149,30 @@ int _clear(struct scall * sc){
 }
 
 int _mkdir(struct scall * sc){
-	return 0;
+	struct stat st = {0};
+	mode_t mode;
+	if(*(sc->args+2) != NULL)
+		mode = strtol(*sc->args+2, NULL, 8);
+	if(stat(*(sc->args+0), &st) == -1){
+		if((sc->args+1) != NULL && strcmp(*(sc->args+1), "-m") == 0){
+			mkdir(*(sc->args+0), mode);
+		} else {
+			mkdir(*(sc->args+0), 0700);
+		}
+		return 0;
+	} else {
+		printf("Directory already exists\n");
+		return 1;
+	}
 }
 
 int _rmdir(struct scall * sc){
+	DIR *dir;
 	return 0;
 }
 
 int _timeout(struct scall * sc){
-	return 0;
+	
 }
 
 int _wait(struct scall * sc){
@@ -177,5 +196,13 @@ int _diff(struct scall * sc){
 }
 
 int _env(struct scall * sc){
+	extern char **environ;
+	char * str = *environ;
+	int i = 1;
+	while(str){
+		printf("%s\n", str);
+		i++;
+		str = *(environ+i);
+	}
 	return 0;
 }
