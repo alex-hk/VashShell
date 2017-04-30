@@ -91,16 +91,54 @@ int parsefunc(struct scall * scal){
 int parseargs(struct scall * scal){
 	int i = 0;
 	scal->args = malloc(10 * sizeof *scal->args);
-	char * str = strdup(scal->msgargs);
+	char * str = (char *) malloc(sizeof scal->msgargs * 1024);
+	printf("%s\n", scal->msgargs);
+	strcpy(str, scal->msgargs);
 	if(str != NULL){
+		int isQuotes = 0;
+		int isArgs = 1;
 		char * ptr = str;
 		int j = 0;
+		char * qptr;
 		char * token;
-		while(*ptr && *ptr != '\0'){
-			if(*ptr == '"'){
+		while(isArgs){
+			if(*ptr == '\0')
+				isArgs = 0;
+			else if(*ptr == ' '){
+				printf("Skipping white space\n");
+				while(*ptr == ' ') ptr++;
+			}
+			else if(*ptr == '\"' || *ptr == '\''){
+				ptr++;
+				j = 0;
+				while((*ptr != '\"' || *ptr != '\'') && ptr != '\0' && ptr != '\n'){
+					ptr++;
+					j++;
+				}
+				strncpy(*(scal->args+i), ptr-j, j);
+				printf("String with quotes: %s\n", *(scal->args+i));
+				i++;
+				ptr++;
+			}
+			else{
+				j = 0;
+				while(*ptr != ' ' || *ptr != '\0' || *ptr != '\n' || *ptr != '\'' || *ptr != '\"'){
+					j++;
+					ptr++;
+				}
+				strncpy(*(scal->args+i), ptr-j, j);
+				printf("String without quotes: %s\n", *(scal->args+i));
+				i++;
+				ptr++;
+			}
+			/*while(true)
 				printf("Parsing argument\n");
 				j = 0;
 				//ptr++;
+				if(*ptr == '"'){
+					ptr++;
+					isQuotes = false;
+				}
 				while(*ptr && ( *(ptr++) != '\n' || *ptr != '\0' )){
 					//if(*(ptr) == ' ') break;	
 					if(*(ptr) != '"') {
@@ -115,20 +153,7 @@ int parseargs(struct scall * scal){
 					ptr++;
 				}
 			}
-			else if(*ptr == ' '){
-				printf("Skipping white space\n");
-				while(*ptr == ' ') ptr++;
-			}
-			else{
-				j = 0;
-				while(*ptr != ' ' || *ptr != '\0' || *ptr != '\n'){
-					j++;
-					ptr++;
-				}
-				strncpy(*(scal->args+i), ptr-j, j);
-				printf("String without quotes: %s\n", *(scal->args+i));
-				i++;
-			}
+			*/
 
 			//while((token = strsep(&str, " "))){
 			//	printf("Token: %s\n", token);
