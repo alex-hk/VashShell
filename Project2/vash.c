@@ -15,19 +15,21 @@ int parseargs(struct scall * scal);
 
 
 int main(int argc, char* argv[]){
-	char * str;
 	int size = 1024;
-	struct scall scal;
+	char str[size];
+	struct scall * scal;
 	while (1){
+		scal = malloc(sizeof *scal);
 		if(getInput(str, size-1) == 0){
 			printf("Error getting input\n");
 			exit(1);
 		}
 		str[strcspn(str, "\n")] = 0;
-		scal.fmsg = str;
+		scal->fmsg = str;
 	//	printf("Message: %s\n", scal.fmsg);
-		parser(&scal);
-		decision(&scal);
+		parser(scal);
+		decision(scal);
+		free(scal);
 	}
 	return 0;
 }
@@ -90,7 +92,10 @@ int parsefunc(struct scall * scal){
 
 int parseargs(struct scall * scal){
 	int i = 0;
-	scal->args = malloc(10 * sizeof *scal->args);
+	scal->args = malloc(8 * sizeof *scal->args);
+	for(int k = 0; k < 8; ++k){
+		*(scal->args+k) = (char *)malloc(256);
+	}
 	char * str = (char *) malloc(sizeof scal->msgargs * 1024);
 	printf("%s\n", scal->msgargs);
 	strcpy(str, scal->msgargs);
@@ -109,24 +114,27 @@ int parseargs(struct scall * scal){
 				while(*ptr == ' ') ptr++;
 			}
 			else if(*ptr == '\"' || *ptr == '\''){
+				printf("Quote string start\n");
 				ptr++;
 				j = 0;
-				while((*ptr != '\"' || *ptr != '\'') && ptr != '\0' && ptr != '\n'){
+				while(*ptr != '\0' && *ptr != '\n' && (*ptr != '"' && *ptr != '\'')){
 					ptr++;
 					j++;
 				}
 				strncpy(*(scal->args+i), ptr-j, j);
+				(*(scal->args+i))[j] = '\0';
 				printf("String with quotes: %s\n", *(scal->args+i));
 				i++;
 				ptr++;
 			}
 			else{
 				j = 0;
-				while(*ptr != ' ' || *ptr != '\0' || *ptr != '\n' || *ptr != '\'' || *ptr != '\"'){
+				while(*ptr != '\0' && *ptr != '\n' && *ptr != ' ' && *ptr != '\'' && *ptr != '\"'){
 					j++;
 					ptr++;
 				}
 				strncpy(*(scal->args+i), ptr-j, j);
+				(*(scal->args+i))[j] = '\0';
 				printf("String without quotes: %s\n", *(scal->args+i));
 				i++;
 				ptr++;
@@ -168,6 +176,7 @@ int parseargs(struct scall * scal){
 		return 1;
 	}
 	scal->argc = i;
+	free(str);
 	return 0;
 }
 
