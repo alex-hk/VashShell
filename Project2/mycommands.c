@@ -204,10 +204,41 @@ int _rmdir(struct scall * sc){
 }
 
 int _timeout(struct scall * sc){
-	
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	if(pid == -1){
+		perror("Failed to create child");
+		exit(EXIT_FAILURE);
+	}
+	else if(pid == 0){
+		execv(sc->args[i], sc->args);
+	}
+	else {
+		sleep(atoi(*(sc->args)));
+			
+	}
 }
 
 int _wait(struct scall * sc){
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	if(pid == -1){
+		perror("Failed to create child");
+		exit(EXIT_FAILURE);
+	}
+	else if(pid == 0){
+		
+	}
+	else {
+		if(waitpid(pid, &status, WNOHANG | WUNTRACED | WCONTINUED) == -1){
+			perror("Waitpid error");
+			exit(EXIT_FAILURE);
+		}
+	}
 	return 0;
 }
 
@@ -219,6 +250,27 @@ int _sleep(struct scall * sc){
 }
 
 int _kill(struct scall * sc){
+	int sig = 15;
+	int i = 0;
+	if(sc->argc >= 1){
+		if(strncmp(sc->args[0], "-9", 2) == 0 || strncmp(sc->args[0], "-SIGKILL", 8) == 0){
+			sig = 9;
+			i++;
+		}
+		if(strncmp(sc->args[0], "-1", 2) == 0 || strncmp(sc->args[0], "-SIGHUP", 7) == 0){
+			sig = 1;
+			i++;
+		}
+		if(strncmp(sc->args[0], "-15", 3) == 0 || strncmp(sc->args[0], "-SIGTERM", 8) == 0){
+			sig = 15;
+			i++;
+		}
+		
+		while(i < sc->argc){
+			kill(atoi(*(sc->args+i)), sig);
+			i++;
+		}
+	}
 	return 0;
 }
 

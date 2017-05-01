@@ -8,7 +8,7 @@
 
 
 int parser(struct scall * scal);
-void decision(struct scall * scal);
+int decision(struct scall * scal);
 int getInput();
 int parsefunc(struct scall * scal);
 int parseargs(struct scall * scal);
@@ -209,7 +209,7 @@ int parseargs(struct scall * scal){
 	return 0;
 }
 
-void decision(struct scall * scal){
+int decision(struct scall * scal){
 	pid_t pid;
 	int status;
 
@@ -243,6 +243,11 @@ void decision(struct scall * scal){
 		_env(scal);
 	}
 	else if(strcmp(scal->func, "timeout") == 0){		//TIMEOUT
+	//	struct scall * sc = malloc(sizeof(*sc));
+	//	if(scal->msgargs != NULL) strcpy(sc->fmsg, scal->msgargs);
+	//	else return 1;
+	//	parser(sc);
+	//	printf("Fmsg: %s\nArgs: %s\n",sc->fmsg, sc->msgargs);
 		_timeout(scal);
 	}
 	else if(strcmp(scal->func, "wait") == 0){		//WAIT
@@ -264,5 +269,7 @@ void decision(struct scall * scal){
 	}
 	else{
 		printf("Invalid choice\n");		//DEFAULT
+		return -1;
 	}
+	return 0;
 }
