@@ -128,22 +128,42 @@ int _ls(struct scall * sc){
 }
 
 int _grep(struct scall * sc){
-	char buf[1024]; //Buffer for found values
+	char * buf = (char*)malloc(1024 * sizeof(char)); //Buffer for lines
+	size_t max_line = 1024;
+	char * ptr;
+	size_t strsz = strlen(*(sc->args));
 	FILE ** f;
-	int count = 0;
-	char * lookup = malloc(sizeof(sc->args[0]));
-	strncpy(lookup, sc->args[0]+1, sizeof(strlen(sc->args[0]-1)));
-	printf("String: %s\n", lookup);
-	f = malloc(sizeof(FILE) * (sc->argc-1));
-	while(count < (sc->argc - 1)){
-		if((f[0] = fopen(sc->args[1], "r")) != NULL){
-			
+	int count = 1;
+	size_t lsize;
+	int ptrcnt = 0;
+	int strcnt = 0;
+	f = malloc(sizeof(FILE) * ((sc->argc)-1));
+	while(count < (sc->argc)){
+
+		if((f[count-1] = fopen(sc->args[count], "r")) != NULL){
+			while((lsize = getline(&buf, &max_line, f[0])) != -1){
+				ptr = buf;
+				ptrcnt = 0;
+				while(ptr && lsize > strsz){
+					if((ptrcnt < (lsize - strsz))){
+						if(*ptr == (*(sc->args)[0])){
+							if(strncmp((ptr), *(sc->args), strsz) == 0){
+								printf("%s: %s", *(sc->args+count), buf);
+								break;
+							} else { ptrcnt+=strsz; ptr+=strsz; }
+						} else { ptr++; ptrcnt++; }
+					} else break;
+				}
+
+			}
 		} else {
 			fprintf(stderr, "%s\n", strerror(errno));
 			return 1;
 		}
+		fclose(f[count-1]);
+		count++;
 	}
-	fclose(f[0]);
+	free(f);
 	return 0;
 }
 
@@ -213,7 +233,7 @@ int _timeout(struct scall * sc){
 		exit(EXIT_FAILURE);
 	}
 	else if(pid == 0){
-		execv(sc->args[i], sc->args);
+		execv(sc->func, sc->args);
 	}
 	else {
 		sleep(atoi(*(sc->args)));
@@ -222,19 +242,9 @@ int _timeout(struct scall * sc){
 }
 
 int _wait(struct scall * sc){
-	pid_t pid;
 	int status;
-
-	pid = fork();
-	if(pid == -1){
-		perror("Failed to create child");
-		exit(EXIT_FAILURE);
-	}
-	else if(pid == 0){
-		
-	}
-	else {
-		if(waitpid(pid, &status, WNOHANG | WUNTRACED | WCONTINUED) == -1){
+	if(sc->argc == 1){
+		if(waitpid(atoi(*(sc->args)), &status, WNOHANG | WUNTRACED | WCONTINUED) == -1){
 			perror("Waitpid error");
 			exit(EXIT_FAILURE);
 		}
