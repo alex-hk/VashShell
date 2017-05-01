@@ -378,6 +378,8 @@ int _stat(struct scall * sc){
 	return 0;
 }
 
+
+
 int _diff(struct scall * sc){
 	FILE * fone;
 	FILE * ftwo;
@@ -388,15 +390,15 @@ int _diff(struct scall * sc){
 	int count = 0;
 
 	char lines[maxlines][1024];
-	char lines[maxlines][1024];
+	char lines2[maxlines][1024];
 
 	char * bufone = (char*)malloc(1024 * sizeof(char));
 	char * buftwo = (char*)malloc(1024 * sizeof(char));
 
 	size_t max_line = 1024;
 
-	int flagsone[maxlines];
-	int flagstwo[maxlines];
+	//int flagsone[maxlines];
+	//int flagstwo[maxlines];
 
 	if((fone = fopen(*(sc->args), "r")) == NULL){
 		perror("File does not exist");
@@ -407,22 +409,60 @@ int _diff(struct scall * sc){
 		return -1;
 	}
 
+	int lcount = 0;
+
 	while(1){
-		if(count < maxlines && getline(bufone, max_line, fone) != -1 && getline(buftwo, max_line, ftwo) != -1){
+		while(count < maxlines && getline(&bufone, &max_line, fone) != -1 && getline(&buftwo, &max_line, ftwo) != -1){
 			if(strcmp(bufone, buftwo) != 0){
 				bools[count] = 1;
 				if(bufone != NULL){
-					strcpy(lines[count], bufone);
+					strcpy(lines[lcount], bufone);
 				}
 				if(buftwo != NULL){
-					strcpy2(lines[count], bufone);
+					strcpy(lines2[lcount], buftwo);
 				}
-				count++;
+				lcount++;
 			} else {
 				bools[count] = 0;
-				count++;
+			}
+			count++;
+		}
+		break;
+	}
+
+	int i = 0;
+	int n = 0;
+	int start = 0;
+	int j = 0;
+	int lc1 = 0;
+	int lc2 = 0;
+
+	while(i < count){
+		start = i+1;
+		j = 0;
+		n = 0;
+		while(bools[i] == 1){
+			n++;
+			i++;
+		}
+		
+		if(n > 0){
+			if(n > 1) printf("%d,%dc%d,%d\n", start, start+n-1, start, start+n-1);
+			else if(n == 1) printf("%dc%d\n", start, start);
+			while(j < n){
+				printf("< %s", lines[lc1]);
+				lc1++;
+				j++;
+			}
+			printf("---\n");
+			j = 0;
+			while(j < n){
+				printf("> %s", lines2[lc2]);
+				lc2++;
+				j++;
 			}
 		}
+		i++;
 	}
 
 
