@@ -126,7 +126,7 @@ int parseargs(struct scall * scal){
 		*(scal->args+k) = (char *)malloc(256);
 	}
 	char * str = (char *) malloc(sizeof scal->msgargs * 1024);
-	printf("%s\n", scal->msgargs);
+	//printf("%s\n", scal->msgargs);
 	strcpy(str, scal->msgargs);
 	if(str != NULL){
 		int isQuotes = 0;
@@ -164,33 +164,33 @@ int parseargs(struct scall * scal){
 				}
 				strncpy(*(scal->args+i), ptr-j, j);
 				(*(scal->args+i))[j] = '\0';
-				printf("String without quotes: %s\n", *(scal->args+i));
+				//printf("String without quotes: %s\n", *(scal->args+i));
 				i++;
 				ptr++;
 			}
-			/*while(true)
-				printf("Parsing argument\n");
-				j = 0;
-				//ptr++;
-				if(*ptr == '"'){
-					ptr++;
-					isQuotes = false;
-				}
-				while(*ptr && ( *(ptr++) != '\n' || *ptr != '\0' )){
-					//if(*(ptr) == ' ') break;	
-					if(*(ptr) != '"') {
-						j++;
-					} else {
-						printf("Sizeof args string: %i\nPtr position: %c\nJ size: %i\n",sizeof scal->args+i, *(ptr-j), j); 	
-						strncpy(*(scal->args+i), ptr-j, j);
-						//(scal->args+i)[j] = '\0';
-						printf("String with quotes: %s\n", *(scal->args+i));
-						i++;
-					}
-					ptr++;
-				}
-			}
-			*/
+//			while(true)
+//				printf("Parsing argument\n");
+//				j = 0;
+//				//ptr++;
+//				if(*ptr == '"'){
+//					ptr++;
+//					isQuotes = false;
+//				}
+//				while(*ptr && ( *(ptr++) != '\n' || *ptr != '\0' )){
+//					//if(*(ptr) == ' ') break;	
+//					if(*(ptr) != '"') {
+//						j++;
+//					} else {
+//						printf("Sizeof args string: %i\nPtr position: %c\nJ size: %i\n",sizeof scal->args+i, *(ptr-j), j); 	
+//						strncpy(*(scal->args+i), ptr-j, j);
+//						//(scal->args+i)[j] = '\0';
+//						printf("String with quotes: %s\n", *(scal->args+i));
+//						i++;
+//					}
+//					ptr++;
+//				}
+//			}
+//			
 
 			//while((token = strsep(&str, " "))){
 			//	printf("Token: %s\n", token);
@@ -210,6 +210,9 @@ int parseargs(struct scall * scal){
 }
 
 void decision(struct scall * scal){
+	pid_t pid;
+	int status;
+
 	if(strcmp(scal->func,"cat") == 0){		//CAT
 		//printf("cat chosen\n");
 		_cat(scal);
@@ -244,6 +247,9 @@ void decision(struct scall * scal){
 	}
 	else if(strcmp(scal->func, "wait") == 0){		//WAIT
 		_wait(scal);
+	}
+	else if(strcmp(scal->func, "stat") == 0){		//WAIT
+		_stat(scal);
 	}
 	else if(strcmp(scal->func, "cd") == 0){			//CD
 		_cd(scal);

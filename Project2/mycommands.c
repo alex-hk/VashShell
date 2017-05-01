@@ -9,6 +9,9 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <time.h>
+#include <grp.h>
+#include <pwd.h>
 
 int _cat(struct scall * sc){
 	char lbuf[1024]; //Buffer for line
@@ -151,23 +154,52 @@ int _clear(struct scall * sc){
 int _mkdir(struct scall * sc){
 	struct stat st = {0};
 	mode_t mode;
-	if(*(sc->args+2) != NULL)
-		mode = strtol(*sc->args+2, NULL, 8);
-	if(stat(*(sc->args+0), &st) == -1){
-		if((sc->args+1) != NULL && strcmp(*(sc->args+1), "-m") == 0){
-			mkdir(*(sc->args+0), mode);
+	int i = 0;
+	while(i < sc->argc){
+		//if(*(sc->args+2) != NULL)
+		//	mode = strtol(*sc->args+2, NULL, 8);
+		
+		if(stat(*(sc->args+i), &st) == -1){
+			//if((sc->args+1) != NULL && strcmp(*(sc->args+1), "-m") == 0){
+			//	mkdir(*(sc->args+0), mode);
+			//} else {
+			//	mkdir(*(sc->args+0), 0700);
+			//}
+			
+			mkdir(*(sc->args+i), 0700);
+			i++;
+			//return 0;
 		} else {
-			mkdir(*(sc->args+0), 0700);
+			printf("Directory already exists\n");
+			i++;
+			//return 1;
 		}
-		return 0;
-	} else {
-		printf("Directory already exists\n");
-		return 1;
 	}
+	return 0;
 }
 
 int _rmdir(struct scall * sc){
-	DIR *dir;
+	struct dirent *d;
+	DIR * dir;
+	int i = 0,j = 0;
+
+	while(i < sc->argc){
+		j = 0;
+	//	printf("Directory to open: %s\n", *(sc->args+i));
+		dir = opendir(*(sc->args+i));
+		if(!dir){
+			printf("Not a directory or doesn't exist\n");
+			closedir(dir);
+			i++;
+			continue;
+		}
+		while((d = readdir(dir)) != NULL){
+			if(++j > 2) break;
+		}
+		if(j <= 2)
+			rmdir(*(sc->args+i));
+		i++;
+	}
 	return 0;
 }
 
@@ -180,6 +212,9 @@ int _wait(struct scall * sc){
 }
 
 int _sleep(struct scall * sc){
+	if(sc->argc == 1) sleep(atoi(*(sc->args)));
+	else return 1;
+	
 	return 0;
 }
 
@@ -188,6 +223,60 @@ int _kill(struct scall * sc){
 }
 
 int _stat(struct scall * sc){
+	struct stat *st = malloc(sizeof(struct stat));
+	stat(*(sc->args), st);
+	int stchmod = st->st_mode&0777;
+	struct passwd *passuid = getpwuid(st->st_uid);
+	struct group *grpgid = getgrgid(st->st_gid);
+	
+	printf("  File: \'%s\'\n", *(sc->args));
+	printf("  Size: %d\t\tBlocks: %d\tIO Block: %d\t",st->st_size,st->st_blocks, st->st_blksize);
+	
+	if(S_ISDIR(st->st_mode)) printf("directory\n");
+	if(S_ISCHR(st->st_mode)) printf("charcter special file\n");
+	if(S_ISBLK(st->st_mode)) printf("block special file\n");
+	if(S_ISREG(st->st_mode)) printf("regular file\n");
+	if(S_ISFIFO(st->st_mode)) printf("FIFO special file\n");
+	if(S_ISLNK(st->st_mode)) printf("symbolic link\n");
+	if(S_ISSOCK(st->st_mode)) printf("socket\n");
+	
+	printf("Device: %xh/%dd\tInode: %d\tLinks: %d\n",st->st_dev, st->st_dev, st->st_ino, st->st_nlink);
+	printf("Access: (%4o/", stchmod);
+	
+	if(S_ISDIR(st->st_mode)) printf("d");
+	else if(S_ISREG(st->st_mode)) printf("-");
+	printf( (st->st_mode & S_IRUSR) ? "r" : "-");
+	printf( (st->st_mode & S_IWUSR) ? "w" : "-");
+	printf( (st->st_mode & S_IXUSR) ? "x" : "-");
+	printf( (st->st_mode & S_IRGRP) ? "r" : "-");
+	printf( (st->st_mode & S_IWGRP) ? "w" : "-");
+	printf( (st->st_mode & S_IXGRP) ? "x" : "-");
+	printf( (st->st_mode & S_IROTH) ? "r" : "-");
+	printf( (st->st_mode & S_IWOTH) ? "w" : "-");
+	printf( (st->st_mode & S_IXOTH) ? "x" : "-");
+	
+	printf(")\tUid: (%5d/%8s)\tGid: (%5d/%10s)\n", st->st_uid, passuid->pw_name, st->st_gid, grpgid->gr_name);
+
+	char bufatime[40];
+	char bufmtime[40];
+	char bufctime[40];
+	struct tm *ats, *mts, *cts;
+	ats = localtime(&st->st_atime);
+	mts = localtime(&st->st_mtime);
+	cts = localtime(&st->st_ctime);
+
+	strftime(bufatime, 40, "%F %T %z", ats);
+	strftime(bufmtime, 40, "%F %T %z", mts);
+	strftime(bufctime, 40, "%F %T %z", cts);
+
+
+
+
+	printf("Access: %s\n", bufatime);
+	printf("Modify: %s\n", bufmtime);
+	printf("Change: %s\n", bufctime);
+	printf(" Birth: %s\n", "-");
+	free(st);
 	return 0;
 }
 
