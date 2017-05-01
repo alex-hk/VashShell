@@ -243,12 +243,12 @@ int decision(struct scall * scal){
 		_env(scal);
 	}
 	else if(strcmp(scal->func, "timeout") == 0){		//TIMEOUT
-		struct scall * sc = malloc(sizeof(*sc));
-		if(scal->msgargs != NULL) strcpy(sc->fmsg, scal->msgargs);
-		else return 1;
-		parser(sc);
-		printf("Fmsg: %s\nArgs: %s\n",sc->fmsg, sc->msgargs);
-		_timeout(sc);
+		//struct scall * sc = malloc(sizeof(*sc));
+		//if(scal->msgargs != NULL) strcpy(sc->fmsg, scal->msgargs);
+		//else return 1;
+		//parser(sc);
+		//printf("Fmsg: %s\nArgs: %s\n",sc->fmsg, sc->msgargs);
+		_timeout(scal);
 	}
 	else if(strcmp(scal->func, "wait") == 0){		//WAIT
 		_wait(scal);

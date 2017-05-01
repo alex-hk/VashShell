@@ -139,22 +139,11 @@ int _grep(struct scall * sc){
 	int strcnt = 0;
 	f = malloc(sizeof(FILE) * ((sc->argc)-1));
 	while(count < (sc->argc)){
-
 		if((f[count-1] = fopen(sc->args[count], "r")) != NULL){
 			while((lsize = getline(&buf, &max_line, f[0])) != -1){
-				ptr = buf;
-				ptrcnt = 0;
-				while(ptr && lsize > strsz){
-					if((ptrcnt < (lsize - strsz))){
-						if(*ptr == (*(sc->args)[0])){
-							if(strncmp((ptr), *(sc->args), strsz) == 0){
-								printf("%s: %s", *(sc->args+count), buf);
-								break;
-							} else { ptrcnt+=strsz; ptr+=strsz; }
-						} else { ptr++; ptrcnt++; }
-					} else break;
+				if(strstr(buf, (*(sc->args))) != NULL){
+					printf("%s: %s", *(sc->args+count), buf);
 				}
-
 			}
 		} else {
 			fprintf(stderr, "%s\n", strerror(errno));
@@ -165,6 +154,33 @@ int _grep(struct scall * sc){
 	}
 	free(f);
 	return 0;
+
+				
+				
+				
+//				ptr = buf;
+//				ptrcnt = 0;
+//				while(ptr && lsize > strsz){
+//					if((ptrcnt < (lsize - strsz))){
+//						if(*ptr == (*(sc->args)[0])){
+//							if(strncmp((ptr), *(sc->args), strsz) == 0){
+//								printf("%s: %s", *(sc->args+count), buf);
+//								break;
+//							} else { ptrcnt+=strsz; ptr+=strsz; }
+//						} else { ptr++; ptrcnt++; }
+//					} else break;
+//				}
+//
+//			}
+//		} else {
+//			fprintf(stderr, "%s\n", strerror(errno));
+//			return 1;
+//		}
+//		fclose(f[count-1]);
+//		count++;
+//	}
+//	free(f);
+//	return 0;
 }
 
 int _clear(struct scall * sc){
@@ -233,18 +249,38 @@ int _timeout(struct scall * sc){
 		exit(EXIT_FAILURE);
 	}
 	else if(pid == 0){
-		execv(sc->func, sc->args);
+		printf("Executing: %s\n", *(sc->args+1));
+		execv(*(sc->args+1), sc->args+2);
 	}
 	else {
 		sleep(atoi(*(sc->args)));
-			
+
+		if(waitpid(pid, &status, WNOHANG | WUNTRACED | WCONTINUED) == -1){
+			perror("wait error");
+			return 1;
+		}
+
+		if(WIFEXITED(status)){
+			int exits = WEXITSTATUS(status);
+			printf("Child exit was %d\n", exits);
+		}
 	}
+	return 0;
 }
 
 int _wait(struct scall * sc){
 	int status;
+	pid_t pid;
+
+	pid = fork();
+	if(pid == -1){
+		perror("Failed to create child");
+		exit(EXIT_FAILURE);	
+	} else if(pid == 0){
+		return 1;
+	}
 	if(sc->argc == 1){
-		if(waitpid(atoi(*(sc->args)), &status, WNOHANG | WUNTRACED | WCONTINUED) == -1){
+		if(waitpid(atoi(*(sc->args)), &status, NULL) == -1){
 			perror("Waitpid error");
 			exit(EXIT_FAILURE);
 		}
@@ -343,6 +379,54 @@ int _stat(struct scall * sc){
 }
 
 int _diff(struct scall * sc){
+	FILE * fone;
+	FILE * ftwo;
+	size_t maxlines = 20;
+
+	int bools[maxlines];
+	int linenum;
+	int count = 0;
+
+	char lines[maxlines][1024];
+	char lines[maxlines][1024];
+
+	char * bufone = (char*)malloc(1024 * sizeof(char));
+	char * buftwo = (char*)malloc(1024 * sizeof(char));
+
+	size_t max_line = 1024;
+
+	int flagsone[maxlines];
+	int flagstwo[maxlines];
+
+	if((fone = fopen(*(sc->args), "r")) == NULL){
+		perror("File does not exist");
+		return -1;
+	}
+	if((ftwo = fopen(*(sc->args+1), "r")) == NULL){
+		perror("File does not exist");
+		return -1;
+	}
+
+	while(1){
+		if(count < maxlines && getline(bufone, max_line, fone) != -1 && getline(buftwo, max_line, ftwo) != -1){
+			if(strcmp(bufone, buftwo) != 0){
+				bools[count] = 1;
+				if(bufone != NULL){
+					strcpy(lines[count], bufone);
+				}
+				if(buftwo != NULL){
+					strcpy2(lines[count], bufone);
+				}
+				count++;
+			} else {
+				bools[count] = 0;
+				count++;
+			}
+		}
+	}
+
+
+
 	return 0;
 }
 
